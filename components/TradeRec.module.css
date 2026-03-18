@@ -1,0 +1,182 @@
+/* ─── Window tabs ────────────────────────────────────────────────── */
+.wrap { padding: 10px 24px 20px; }
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.tab {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  padding: 5px 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 2px;
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+  white-space: nowrap;
+}
+.tab:hover { color: var(--text-secondary); border-color: var(--border-muted); }
+
+.tabActive {
+  composes: tab;
+  color: var(--text-primary);
+  border-color: var(--border-active);
+  background: var(--bg-card);
+}
+
+.tabNow {
+  composes: tab;
+}
+
+.windowMeta {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-tertiary);
+  letter-spacing: 0.08em;
+  margin-bottom: 12px;
+  padding: 6px 10px;
+  border-left: 2px solid var(--border-muted);
+}
+
+/* ─── Trade cards ────────────────────────────────────────────────── */
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--border-subtle);
+  gap: 10px;
+}
+
+.cardHeaderLeft { display: flex; align-items: center; gap: 10px; min-width: 0; }
+
+.tierBadge {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  padding: 2px 8px;
+  border-radius: 2px;
+  border: 1px solid;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.headline {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.urgencyBadge {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  padding: 2px 7px;
+  border-radius: 2px;
+  border: 1px solid;
+  flex-shrink: 0;
+}
+
+/* ─── Legs table ─────────────────────────────────────────────────── */
+.legsTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.legsTable tr:not(:last-child) td { border-bottom: 1px solid var(--border-subtle); }
+
+.legsTable td {
+  padding: 5px 14px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+.legAction { font-weight: 600; letter-spacing: 0.1em; min-width: 44px; }
+.legQty    { color: var(--text-secondary); min-width: 90px; }
+.legInst   { color: var(--text-primary);   font-weight: 500; min-width: 50px; }
+.legDetail { color: var(--text-secondary); width: 100%; }
+.legRole   {
+  text-align: right;
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  padding: 5px 14px 5px 6px;
+}
+
+/* ─── Metrics row ────────────────────────────────────────────────── */
+.metrics {
+  display: flex;
+  gap: 0;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.metric {
+  flex: 1;
+  padding: 7px 14px;
+  border-right: 1px solid var(--border-subtle);
+}
+.metric:last-child { border-right: none; }
+
+.metricLabel {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.14em;
+  color: var(--text-tertiary);
+  margin-bottom: 3px;
+}
+
+.metricVal {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* ─── Rationale ──────────────────────────────────────────────────── */
+.rationale {
+  padding: 8px 14px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* ─── Mobile ─────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .wrap { padding: 10px 16px 20px; }
+
+  .headline { font-size: 9px; }
+
+  .legsTable td { padding: 5px 10px; font-size: 8px; }
+  .legRole  { padding: 5px 10px 5px 4px; }
+
+  .metrics { flex-wrap: wrap; }
+  .metric  { min-width: 50%; border-right: 1px solid var(--border-subtle); }
+  .metric:nth-child(2n) { border-right: none; }
+
+  .rationale { font-size: 10px; padding: 8px 10px; }
+}

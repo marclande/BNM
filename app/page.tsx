@@ -9,7 +9,7 @@ import {
 } from '@/lib/regime'
 import Topbar from '@/components/Topbar'
 import Sidebar from '@/components/Sidebar'
-import { RegimePanel, TermStructureChart, CarryBreakdown, PositionSpecs, SatelliteScanner, VolSurface } from '@/components/index'
+import { RegimePanel, TermStructureChart, CarryBreakdown, PositionSpecs, SatelliteScanner, VolSurface, TradeRecommendations } from '@/components/index'
 
 export interface DashState {
   vix: number
@@ -56,6 +56,9 @@ export default function Page() {
         <main className={styles.content}>
           <RegimePanel regime={regime} R={R} confidence={confidence} ratio={ratio} vvix={state.vvix} vix={state.vix} />
           <div className={styles.scrollArea}>
+            <Section label="Daily Trade Recommendations — 4 Windows · 4 Risk Tiers">
+              <TradeRecommendations state={state} regime={regime} />
+            </Section>
             <Section label="VIX Term Structure">
               <TermStructureChart points={termStructure} regime={regime} ratio={ratio} />
             </Section>
