@@ -1,0 +1,66 @@
+/* RegimePanel */
+.regimePanel {
+  padding: 18px 24px;
+  border-left: 3px solid transparent;
+  transition: border-color 0.4s, background 0.4s;
+}
+.regimeTop { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.regimeName { font-family: var(--font-mono); font-size: 20px; font-weight: 600; letter-spacing: 0.02em; margin-bottom: 6px; }
+.regimeDesc { font-size: 13px; color: var(--text-secondary); line-height: 1.6; max-width: 580px; }
+.confidenceBlock { text-align: right; flex-shrink: 0; }
+.confLabel { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.18em; color: var(--text-tertiary); margin-bottom: 2px; }
+.confVal { font-family: var(--font-mono); font-size: 28px; font-weight: 600; }
+.pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.pill { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.12em; padding: 3px 9px; border-radius: 2px; border: 1px solid; }
+
+/* TermStructure */
+.tsWrap { padding: 10px 24px 14px; }
+.tsRow { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; }
+.tsLabel { font-family: var(--font-mono); font-size: 10px; color: var(--text-secondary); min-width: 38px; }
+.tsTrack { flex: 1; height: 12px; background: var(--bg-tertiary); border-radius: 2px; overflow: hidden; }
+.tsFill { height: 100%; border-radius: 2px; transition: width 0.4s ease; }
+.tsVal { font-family: var(--font-mono); font-size: 11px; font-weight: 500; min-width: 38px; text-align: right; }
+.tsNote { font-family: var(--font-mono); font-size: 9px; margin-top: 8px; letter-spacing: 0.08em; }
+
+/* CarryBreakdown */
+.carryGrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 10px 24px 14px; }
+.carryItem { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 4px; padding: 10px 12px; }
+.carryItemLabel { font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.15em; color: var(--text-tertiary); margin-bottom: 5px; }
+.carryItemVal { font-family: var(--font-mono); font-size: 17px; font-weight: 600; }
+.carryItemSub { font-family: var(--font-mono); font-size: 9px; color: var(--text-tertiary); margin-top: 3px; }
+
+/* PositionSpecs */
+.posGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 10px 24px 14px; }
+.posCard { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 5px; padding: 12px 14px; }
+.posHeader { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+.posTitle { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; color: var(--text-secondary); }
+.posBadge { font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.1em; padding: 2px 7px; border-radius: 2px; border: 1px solid; }
+.posRows { margin-bottom: 10px; }
+.posRow { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid var(--border-subtle); }
+.posRow:last-child { border-bottom: none; }
+.posRowLabel { font-family: var(--font-mono); font-size: 9px; color: var(--text-tertiary); letter-spacing: 0.08em; }
+.posRowVal { font-family: var(--font-mono); font-size: 11px; font-weight: 500; }
+.posFooter { display: flex; justify-content: space-between; padding-top: 8px; border-top: 1px solid var(--border-subtle); }
+.posFooterItem {}
+.posFooterLabel { font-family: var(--font-mono); font-size: 8px; color: var(--text-tertiary); }
+.posFooterVal { font-family: var(--font-mono); font-size: 11px; font-weight: 500; margin-top: 2px; }
+
+/* SatelliteScanner */
+.scannerWrap { padding: 6px 24px 14px; display: flex; flex-direction: column; gap: 8px; }
+.scannerRow { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 5px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.scannerLeft { display: flex; align-items: flex-start; gap: 10px; }
+.dot { width: 7px; height: 7px; border-radius: 50%; margin-top: 3px; flex-shrink: 0; }
+.scannerName { font-family: var(--font-mono); font-size: 11px; font-weight: 500; margin-bottom: 2px; }
+.scannerDesc { font-size: 11px; color: var(--text-secondary); max-width: 480px; line-height: 1.5; }
+.scannerRight { display: flex; gap: 20px; flex-shrink: 0; }
+.scannerStat { text-align: right; }
+.scannerStatLabel { font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.15em; color: var(--text-tertiary); display: block; margin-bottom: 2px; }
+.scannerStatVal { font-family: var(--font-mono); font-size: 11px; font-weight: 500; }
+
+/* VolSurface */
+.surfaceWrap { padding: 6px 24px 14px; }
+.surfaceGrid { display: grid; gap: 3px; }
+.surfaceHeader { font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.1em; color: var(--text-tertiary); text-align: center; padding: 3px 0; }
+.surfaceExpiry { font-family: var(--font-mono); font-size: 8px; color: var(--text-tertiary); display: flex; align-items: center; justify-content: flex-end; padding-right: 6px; }
+.surfaceCell { height: 28px; border-radius: 2px; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 9px; }
+.surfaceNote { font-family: var(--font-mono); font-size: 9px; color: var(--text-tertiary); margin-top: 8px; letter-spacing: 0.06em; }
