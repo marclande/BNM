@@ -51,6 +51,7 @@ html, body {
   width: 100%;
   overflow: hidden;
   background: var(--bg-primary);
+  /* overflow-y: auto is applied on mobile via media query in page.module.css */
   color: var(--text-primary);
   font-family: var(--font-sans);
   font-size: 14px;
@@ -78,3 +79,10 @@ input[type="number"]::-webkit-inner-spin-button {
 ::-webkit-scrollbar-thumb:hover { background: var(--border-active); }
 
 * { transition-property: color, background-color, border-color; transition-duration: 0.3s; transition-timing-function: ease; }
+
+@media (max-width: 768px) {
+  html, body {
+    overflow: auto;
+    height: auto;
+  }
+}

@@ -10,14 +10,15 @@ interface Props {
   regime: RegimeId
   carry: CarryResult
   R: RegimeConfig
+  isOpen: boolean
 }
 
-export default function Sidebar({ state, update, regime, carry, R }: Props) {
+export default function Sidebar({ state, update, regime, carry, R, isOpen }: Props) {
   const carryPct = (carry.netCarryPct * 100).toFixed(2)
   const barWidth = Math.min(100, Math.max(2, 50 + carry.netCarryPct * 2500))
 
   return (
-    <aside className={styles.sidebar}>
+    <aside className={`${styles.sidebar} ${isOpen ? styles.sidebarOpen : ''}`}>
 
       <div className={styles.section}>
         <div className={styles.label}>Market Inputs</div>

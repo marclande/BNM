@@ -33,6 +33,7 @@ const DEFAULT: DashState = {
 
 export default function Page() {
   const [state, setState] = useState<DashState>(DEFAULT)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   const regime: RegimeId = classifyRegime(state.vix, state.vix3m, state.vvix)
   const R = REGIMES[regime]
@@ -48,9 +49,10 @@ export default function Page() {
 
   return (
     <div className={styles.app}>
-      <Topbar regime={regime} R={R} carry={carry} />
+      <Topbar regime={regime} R={R} carry={carry} onMenuClick={() => setSidebarOpen(o => !o)} />
+      {sidebarOpen && <div className={styles.overlay} onClick={() => setSidebarOpen(false)} />}
       <div className={styles.layout}>
-        <Sidebar state={state} update={update} regime={regime} carry={carry} R={R} />
+        <Sidebar state={state} update={update} regime={regime} carry={carry} R={R} isOpen={sidebarOpen} />
         <main className={styles.content}>
           <RegimePanel regime={regime} R={R} confidence={confidence} ratio={ratio} vvix={state.vvix} vix={state.vix} />
           <div className={styles.scrollArea}>

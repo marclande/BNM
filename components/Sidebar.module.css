@@ -7,6 +7,22 @@
   height: 100%;
 }
 
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: -272px;
+    width: 272px;
+    height: 100%;
+    z-index: 50;
+    transition: left 0.25s ease;
+    border-right: 1px solid var(--border-muted);
+  }
+  .sidebarOpen {
+    left: 0;
+  }
+}
+
 .section {
   padding: 12px 14px;
   border-bottom: 1px solid var(--border-subtle);

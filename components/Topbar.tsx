@@ -8,9 +8,10 @@ interface Props {
   regime: RegimeId
   R: RegimeConfig
   carry: CarryResult
+  onMenuClick: () => void
 }
 
-export default function Topbar({ regime, R, carry }: Props) {
+export default function Topbar({ regime, R, carry, onMenuClick }: Props) {
   const [time, setTime] = useState('')
   const [session, setSession] = useState('')
 
@@ -35,6 +36,13 @@ export default function Topbar({ regime, R, carry }: Props) {
   return (
     <div className={styles.bar}>
       <div className={styles.left}>
+        <button className={styles.menuButton} onClick={onMenuClick} aria-label="Toggle sidebar">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <rect y="2" width="16" height="1.5" rx="1"/>
+            <rect y="7.25" width="16" height="1.5" rx="1"/>
+            <rect y="12.5" width="16" height="1.5" rx="1"/>
+          </svg>
+        </button>
         <span className={styles.logo}>DRAGON // VOL DESK</span>
         <span
           className={styles.badge}

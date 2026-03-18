@@ -64,3 +64,31 @@
 .surfaceExpiry { font-family: var(--font-mono); font-size: 8px; color: var(--text-tertiary); display: flex; align-items: center; justify-content: flex-end; padding-right: 6px; }
 .surfaceCell { height: 28px; border-radius: 2px; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 9px; }
 .surfaceNote { font-family: var(--font-mono); font-size: 9px; color: var(--text-tertiary); margin-top: 8px; letter-spacing: 0.06em; }
+
+@media (max-width: 768px) {
+  /* RegimePanel */
+  .regimePanel { padding: 14px 16px; }
+  .regimeTop { flex-direction: column; gap: 10px; }
+  .regimeName { font-size: 16px; }
+  .regimeDesc { font-size: 12px; max-width: 100%; }
+  .confidenceBlock { text-align: left; }
+  .confVal { font-size: 22px; }
+
+  /* TermStructure */
+  .tsWrap { padding: 10px 16px 14px; }
+
+  /* CarryBreakdown */
+  .carryGrid { grid-template-columns: repeat(2, 1fr); padding: 10px 16px 14px; }
+
+  /* PositionSpecs */
+  .posGrid { grid-template-columns: 1fr; padding: 10px 16px 14px; }
+
+  /* SatelliteScanner */
+  .scannerWrap { padding: 6px 16px 14px; }
+  .scannerRow { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .scannerRight { width: 100%; justify-content: flex-start; gap: 14px; }
+  .scannerDesc { max-width: 100%; }
+
+  /* VolSurface */
+  .surfaceWrap { padding: 6px 16px 14px; overflow-x: auto; }
+}
