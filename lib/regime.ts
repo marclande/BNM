@@ -155,7 +155,7 @@ export interface TermPoint {
 export function buildTermStructure(vix: number, vix3m: number): TermPoint[] {
   const ratio = vix / vix3m
   const isBackward = ratio >= 1.0
-  const pts: TermPoint[] = [
+  const pts: { label: string; val: number }[] = [
     { label: 'SPOT', val: vix },
     { label: '1M', val: vix * (isBackward ? 0.95 : 1.04) },
     { label: '2M', val: vix3m * (isBackward ? 0.94 : 1.00) },

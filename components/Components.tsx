@@ -1,7 +1,8 @@
 'use client'
 
 import styles from './Components.module.css'
-import { type RegimeId, type RegimeConfig, type CarryResult, type TermPoint, type DashState } from '@/lib/regime'
+import { type RegimeId, type RegimeConfig, type CarryResult, type TermPoint } from '@/lib/regime'
+import { type DashState } from '@/app/page'
 
 // ─── RegimePanel ───────────────────────────────────────────────────────────────
 
