@@ -75,7 +75,9 @@ export default function TradeRecommendations({ state, regime, lookupOption }: Pr
     state.acctK, state.maxRiskPct, regime,
   )
 
-  const active = windows.find(w => w.window === activeWindow)!
+  const active = windows.find(w => w.window === activeWindow) ?? windows[0]
+
+  if (!active) return null
 
   return (
     <div className={styles.wrap}>
