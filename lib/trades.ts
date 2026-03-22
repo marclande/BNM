@@ -35,6 +35,9 @@ interface P {
   vix: number
   spy: number
   uvxy: number
+  uvix: number
+  svxy: number
+  vxx: number
   maxRisk: number
   dte: number
   urgency: TradeRec['urgency']
@@ -75,13 +78,20 @@ export function buildAllWindowRecs(
   acctK:      number,
   maxRiskPct: number,
   regime:     RegimeId,
+  uvix:       number = 0,
+  svxy:       number = 0,
+  vxx:        number = 0,
 ): WindowRecs[] {
   const spy     = spx / 10
   const maxRisk = acctK * 1000 * maxRiskPct / 100
+  // Fallback estimates if prices not supplied
+  const _uvix = uvix > 0 ? uvix : uvxy * 0.92
+  const _svxy = svxy > 0 ? svxy : Math.max(8, 95 - uvxy * 0.42)
+  const _vxx  = vxx  > 0 ? vxx  : vix * 1.88
 
   return ([1, 2, 3, 4] as WindowId[]).map(w => {
     const p: P = {
-      vix, spy, uvxy, maxRisk,
+      vix, spy, uvxy, uvix: _uvix, svxy: _svxy, vxx: _vxx, maxRisk,
       dte:     WINDOW_DTE[w - 1],
       urgency: WINDOW_URGENCY[w - 1],
     }
@@ -130,76 +140,88 @@ function r1t1(p: P): TradeRec {
 }
 
 function r1t2(p: P): TradeRec {
-  const { uvxy, dte, urgency } = p
+  const { uvxy, svxy, dte, urgency } = p
   const s27    = strike(uvxy, 1.27)
-  const credit = fi(uvxy * 5.2)
-  const sRisk  = fi(50 * uvxy * 0.15)
-  const sTgt   = fi(50 * uvxy * 0.10)
+  const uvxyCr = fi(uvxy * 5.2)
+  const svxySh = 50
+  const svxyTgt = fi(svxySh * svxy * 0.08)
+  const svxyRsk = fi(svxySh * svxy * 0.10)
   return {
     tier: 2, tierLabel: TIER_META[2].label, tierColor: TIER_META[2].color,
-    headline: 'UVXY CARRY — CALL + DELTA OVERLAY',
+    headline: 'SVXY LONG + UVXY SHORT — DUAL CARRY',
     legs: [
-      { action: 'SELL',  qty: '1 contract', instrument: 'UVXY', detail: `$${f2(s27)}C · ${dte}DTE`,                        role: 'CORE'  },
-      { action: 'SHORT', qty: '50 shares',  instrument: 'UVXY', detail: `@ $${f2(uvxy)} · stop $${f2(uvxy * 1.15)}`,       role: 'SCALE' },
+      { action: 'SELL', qty: '1 contract',  instrument: 'UVXY', detail: `$${f2(s27)}C · ${dte}DTE`,                         role: 'CORE'   },
+      { action: 'LONG', qty: `${svxySh} sh`, instrument: 'SVXY', detail: `@ $${f2(svxy)} · stop $${f2(svxy * 0.90)}`,       role: 'INCOME' },
     ],
-    riskAmt: credit * 2 + sRisk, targetAmt: credit + sTgt,
-    rationale: `Short call premium + 50-share ETN short amplifies contango decay. Shares stop +15% ($${f2(uvxy * 1.15)}). Option exits at 2× credit. Combined risk $${fi(credit * 2 + sRisk)} / target $${fi(credit + sTgt)}.`,
+    riskAmt: uvxyCr * 2 + svxyRsk, targetAmt: uvxyCr + svxyTgt,
+    rationale: `Dual carry extraction: UVXY call spread harvests contango premium; SVXY long captures inverse decay drift. Both benefit from calm vol — negative correlation reduces net portfolio vol. SVXY stop -10% ($${f2(svxy * 0.90)}). Option exits at 2× credit.`,
     urgency,
   }
 }
 
 function r1t3(p: P): TradeRec {
-  const { uvxy, spy, dte, urgency, maxRisk } = p
-  const s27       = strike(uvxy, 1.27)
-  const credit    = fi(uvxy * 5.2)
-  const spyShs    = Math.max(10, Math.min(100, fi(maxRisk * 0.35 / spy)))
-  const uvxyShs   = 100
-  const sRisk     = fi(uvxyShs * uvxy * 0.15) + fi(spyShs * spy * 0.01)
-  const sTgt      = fi(uvxyShs * uvxy * 0.10) + fi(spyShs * spy * 0.015)
+  const { uvxy, svxy, vxx, spy, dte, urgency, vix } = p
+  const uvxyStk  = strike(uvxy, 1.27)
+  const vxxStk   = strike(vxx,  1.20)
+  const uvxyCr   = fi(uvxy * 5.2)
+  const vxxCr    = fi(vxx  * 3.8)
+  const svxyShs  = 50
+  const svxyRsk  = fi(svxyShs * svxy * 0.10)
+  const svxyTgt  = fi(svxyShs * svxy * 0.08)
+  const vixStk   = Math.round(vix + 4)
+  const vixCost  = fi(vix * 1.2)
   return {
     tier: 3, tierLabel: TIER_META[3].label, tierColor: TIER_META[3].color,
-    headline: 'UVXY DECAY + SPY DRIFT CARRY',
+    headline: 'FULL 4-PRODUCT BALANCED BOOK',
     legs: [
-      { action: 'SELL',  qty: '1 contract',   instrument: 'UVXY', detail: `$${f2(s27)}C · ${dte}DTE`,                   role: 'CORE'  },
-      { action: 'SHORT', qty: `${uvxyShs} sh`, instrument: 'UVXY', detail: `@ $${f2(uvxy)} · stop $${f2(uvxy * 1.15)}`, role: 'SCALE' },
-      { action: 'LONG',  qty: `${spyShs} sh`,  instrument: 'SPY',  detail: `@ mkt · stop $${f1(spy * 0.99)}`,            role: 'HEDGE' },
+      { action: 'SELL', qty: '1 contract',   instrument: 'UVXY', detail: `$${f2(uvxyStk)}C · ${dte}DTE`,               role: 'CORE'   },
+      { action: 'SELL', qty: '1 contract',   instrument: 'VXX',  detail: `$${f2(vxxStk)}C · ${dte}DTE`,                role: 'INCOME' },
+      { action: 'LONG', qty: `${svxyShs} sh`, instrument: 'SVXY', detail: `@ $${f2(svxy)} · stop $${f2(svxy * 0.90)}`, role: 'SCALE'  },
+      { action: 'BUY',  qty: '1 contract',   instrument: 'VIX',  detail: `$${vixStk}C · 60DTE (tail hedge)`,            role: 'HEDGE'  },
     ],
-    riskAmt: credit * 2 + sRisk, targetAmt: credit + sTgt,
-    rationale: `UVXY decay + SPY equity drift. Negative correlation between legs reduces net portfolio vol. UVXY stop +15%, SPY stop -1%. Risk $${fi(credit * 2 + sRisk)}, target $${fi(credit + sTgt)}.`,
+    riskAmt: uvxyCr * 2 + vxxCr * 2 + svxyRsk + vixCost,
+    targetAmt: uvxyCr + vxxCr + svxyTgt,
+    rationale: `Full 4-product balanced carry: UVXY + VXX call spreads generate premium; SVXY long captures inverse drift; VIX call provides tail protection if vol escalates. Diversified exposure across the whole ETN universe — maximum carry efficiency in Regime 1.`,
     urgency,
   }
 }
 
 function r1t4(p: P): TradeRec {
-  const { uvxy, dte, urgency } = p
+  const { uvxy, uvix, svxy, vxx, dte, urgency } = p
   const d7  = Math.max(5, fi(dte * 0.35))
   const d14 = Math.max(7, fi(dte * 0.65))
-  const d60 = fi(dte * 2.8)
-  const s27 = strike(uvxy, 1.27); const s44 = strike(uvxy, 1.44)
-  const s10 = strike(uvxy, 1.10); const p05 = strike(uvxy, 0.95)
-  const p20 = strike(uvxy, 0.80); const deep = strike(uvxy, 2.00)
-  const cr27 = fi(uvxy * 5.2);  const cCap  = fi(uvxy * 2.1)
-  const cr10 = fi(uvxy * 11.5); const crP5  = fi(uvxy * 4.8)
-  const cFlr = fi(uvxy * 1.8);  const cSpk  = fi(uvxy * 0.8)
-  const net  = cr27 - cCap + cr10 + crP5 - cFlr - cSpk
-  const sprdLoss = fi((s44 - s27) * 100)
-  const shRisk   = fi(150 * uvxy * 0.12)
+  // UVXY condor
+  const uCsh = strike(uvxy, 1.20); const uCcap = strike(uvxy, 1.35)
+  const uPsh = strike(uvxy, 0.90); const uPflr = strike(uvxy, 0.75)
+  // VXX condor
+  const vCsh = strike(vxx, 1.20);  const vCcap = strike(vxx, 1.35)
+  const vPsh = strike(vxx, 0.90);  const vPflr = strike(vxx, 0.75)
+  // SVXY collar
+  const svxyCal = strike(svxy, 1.10); const svxyPut = strike(svxy, 0.92)
+  // UVIX overflow short
+  const uvixStk = strike(uvix, 1.27)
+
+  const uvxyCr  = fi(uvxy * 3.5); const vxxCr = fi(vxx * 2.2)
+  const svxyCollarCr = fi(svxy * 2.8)
+  const uvixCr  = fi(uvix * 5.0)
+  const net = uvxyCr + vxxCr + svxyCollarCr + uvixCr
+
   return {
     tier: 4, tierLabel: TIER_META[4].label, tierColor: TIER_META[4].color,
-    headline: 'UVXY FULL 8-LEG HARVEST ENGINE',
+    headline: 'MULTI-PRODUCT IRON CONDOR MATRIX',
     legs: [
-      { action: 'SELL',  qty: '1 contract',  instrument: 'UVXY', detail: `$${f2(s27)}C · ${dte}DTE (main income)`,       role: 'CORE'   },
-      { action: 'BUY',   qty: '1 contract',  instrument: 'UVXY', detail: `$${f2(s44)}C · ${dte}DTE (spread cap)`,        role: 'TAIL'   },
-      { action: 'SELL',  qty: '1 contract',  instrument: 'UVXY', detail: `$${f2(s10)}C · ${d7}DTE (near gamma)`,         role: 'INCOME' },
-      { action: 'SELL',  qty: '1 contract',  instrument: 'UVXY', detail: `$${f2(p05)}P · ${d14}DTE (put income)`,        role: 'INCOME' },
-      { action: 'BUY',   qty: '1 contract',  instrument: 'UVXY', detail: `$${f2(p20)}P · ${d14}DTE (put floor)`,         role: 'TAIL'   },
-      { action: 'SHORT', qty: '100 sh',      instrument: 'UVXY', detail: `@ $${f2(uvxy)} · stop $${f2(uvxy * 1.12)}`,    role: 'CORE'   },
-      { action: 'SHORT', qty: '50 sh',       instrument: 'UVXY', detail: `scale tranche · stop $${f2(uvxy * 1.12)}`,     role: 'SCALE'  },
-      { action: 'BUY',   qty: '1 contract',  instrument: 'UVXY', detail: `$${f2(deep)}C · ${d60}DTE (spike tail)`,       role: 'TAIL'   },
+      { action: 'SELL', qty: '1 ct', instrument: 'UVXY', detail: `$${f2(uCsh)}C · ${dte}DTE (condor)`,         role: 'CORE'   },
+      { action: 'BUY',  qty: '1 ct', instrument: 'UVXY', detail: `$${f2(uCcap)}C · ${dte}DTE (call cap)`,      role: 'TAIL'   },
+      { action: 'SELL', qty: '1 ct', instrument: 'UVXY', detail: `$${f2(uPsh)}P · ${dte}DTE (put short)`,      role: 'INCOME' },
+      { action: 'BUY',  qty: '1 ct', instrument: 'UVXY', detail: `$${f2(uPflr)}P · ${dte}DTE (put floor)`,     role: 'TAIL'   },
+      { action: 'SELL', qty: '1 ct', instrument: 'VXX',  detail: `$${f2(vCsh)}C · ${d14}DTE (condor)`,         role: 'INCOME' },
+      { action: 'BUY',  qty: '1 ct', instrument: 'VXX',  detail: `$${f2(vCcap)}C · ${d14}DTE (cap)`,           role: 'TAIL'   },
+      { action: 'SELL', qty: '1 ct', instrument: 'SVXY', detail: `$${f2(svxyCal)}C · ${d7}DTE (collar sell)`,  role: 'INCOME' },
+      { action: 'SELL', qty: '1 ct', instrument: 'UVIX', detail: `$${f2(uvixStk)}C · ${dte}DTE (overflow)`,    role: 'SCALE'  },
     ],
-    riskAmt: sprdLoss + shRisk + cr10 * 2,
-    targetAmt: Math.max(0, fi(net * 0.75)),
-    rationale: `Full UVXY carry engine: call spread (${dte}DTE) + near-term gamma (${d7}DTE) + put sale + 150 short shares. Three tail hedges (call cap, put floor, spike call) contain extreme loss. Net theoretical credit ~$${fi(net)}. Max profit if UVXY drifts lower into expiry.`,
+    riskAmt: fi((uCcap - uCsh) * 100) + fi((vCcap - vCsh) * 100),
+    targetAmt: Math.max(0, fi(net * 0.70)),
+    rationale: `Full 4-product iron condor matrix: UVXY + VXX simultaneous condors harvest premium across two correlated products; SVXY collar captures upside while limiting exposure; UVIX overflow call adds carry. Max loss capped at spread widths. Net theoretical credit ~$${fi(net)}.`,
     urgency,
   }
 }
@@ -207,59 +229,65 @@ function r1t4(p: P): TradeRec {
 // ─── REGIME 2 · NEUTRAL CARRY ─────────────────────────────────────────────────
 
 function r2t1(p: P): TradeRec {
-  const { vix, dte, urgency } = p
-  const stk  = Math.round(vix + 5)
-  const cost = fi(vix * 1.5)                   // VIX 5pt OTM call est.
+  const { vix, vxx, dte, urgency } = p
+  const vxxStk = strike(vxx, 1.15)
+  const vxxCr  = fi(vxx * 2.8)
+  const vixStk = Math.round(vix + 5)
+  const vixCost = fi(vix * 1.5)
   return {
     tier: 1, tierLabel: TIER_META[1].label, tierColor: TIER_META[1].color,
-    headline: 'VIX EVENT HEDGE',
+    headline: 'VXX CALL — DEFINED RISK HEDGE',
     legs: [
-      { action: 'BUY', qty: '1 contract', instrument: 'VIX', detail: `$${stk}C · ${dte}DTE`, role: 'CORE' },
+      { action: 'BUY', qty: '1 contract', instrument: 'VXX', detail: `$${f2(vxxStk)}C · ${dte}DTE (alt: VIX $${vixStk}C)`, role: 'CORE' },
     ],
-    riskAmt: cost, targetAmt: cost * 3,
-    rationale: `Buy 1 VIX $${stk}C — asymmetric hedge as regime transitions. VIX at $${vix.toFixed(1)}, target profit if VIX spikes above $${stk}. Max loss: est. $${cost} premium. 1:3 R:R if vol expands.`,
+    riskAmt: vxxCr, targetAmt: vxxCr * 3,
+    rationale: `VXX call as lower-cost alternative to VIX calls in neutral regime — same vol exposure, defined risk, tradeable in equity account. VXX $${f2(vxx)}, targeting breakeven $${f2(vxxStk)} on expansion. Alt: VIX $${vixStk}C at ~$${vixCost}. 1:3 R:R if vol escalates to Regime 3.`,
     urgency,
   }
 }
 
 function r2t2(p: P): TradeRec {
-  const { vix, uvxy, dte, urgency } = p
-  const vStk  = Math.round(vix + 5)
-  const vCost = fi(vix * 1.5)
-  const uStk  = strike(uvxy, 1.20)
-  const uCr   = fi(uvxy * 3.8)
-  const shRsk = fi(50 * uvxy * 0.20)
+  const { uvxy, svxy, dte, urgency } = p
+  const uvxyStk = strike(uvxy, 1.20)
+  const uvxyCr  = fi(uvxy * 3.8)
+  const svxyShs = 50
+  const svxyRsk = fi(svxyShs * svxy * 0.12)
+  const svxyTgt = fi(svxyShs * svxy * 0.07)
   return {
     tier: 2, tierLabel: TIER_META[2].label, tierColor: TIER_META[2].color,
-    headline: 'HEDGED CARRY — VIX CALL + UVXY DECAY',
+    headline: 'SVXY LIGHT LONG + UVXY CONSERVATIVE SHORT',
     legs: [
-      { action: 'BUY',   qty: '1 contract', instrument: 'VIX',  detail: `$${vStk}C · ${dte}DTE`,                         role: 'HEDGE'  },
-      { action: 'SHORT', qty: '50 shares',  instrument: 'UVXY', detail: `@ $${f2(uvxy)} · stop $${f2(uvxy * 1.20)}`,      role: 'INCOME' },
+      { action: 'SELL', qty: '1 contract',   instrument: 'UVXY', detail: `$${f2(uvxyStk)}C · ${dte}DTE`,                role: 'CORE'   },
+      { action: 'LONG', qty: `${svxyShs} sh`, instrument: 'SVXY', detail: `@ $${f2(svxy)} · stop $${f2(svxy * 0.88)}`,  role: 'INCOME' },
     ],
-    riskAmt: vCost + shRsk, targetAmt: uCr + vCost * 2,
-    rationale: `Neutral carry: UVXY short collects decay premium; VIX call provides upside if regime escalates. UVXY stop +20% ($${f2(uvxy * 1.20)}). Short premium partially finances VIX call. Works in both flat and spike scenarios.`,
+    riskAmt: uvxyCr * 2 + svxyRsk, targetAmt: uvxyCr + svxyTgt,
+    rationale: `Dual carry in neutral regime: UVXY call spread harvests moderate premium; SVXY light long captures positive drift. Smaller size than Regime 1 — risk-adjusted for transitional environment. SVXY stop -12% ($${f2(svxy * 0.88)}), UVXY exits at 2× credit.`,
     urgency,
   }
 }
 
 function r2t3(p: P): TradeRec {
-  const { vix, uvxy, spy, dte, urgency } = p
-  const vStk  = Math.round(vix + 5)
-  const vCost = fi(vix * 1.5)
-  const spySh = 50
-  const uCr   = fi(uvxy * 3.8)
-  const shRsk = fi(50 * uvxy * 0.20) + fi(spySh * spy * 0.01)
-  const shTgt = fi(50 * uvxy * 0.10) + fi(spySh * spy * 0.015)
+  const { vix, uvxy, svxy, vxx, dte, urgency } = p
+  const uvxyStk = strike(uvxy, 1.20)
+  const uvxyCr  = fi(uvxy * 3.8)
+  const vxxStk  = strike(vxx, 1.15)
+  const vxxCr   = fi(vxx * 2.5)
+  const svxyShs = 30
+  const svxyRsk = fi(svxyShs * svxy * 0.12)
+  const vixStk  = Math.round(vix + 5)
+  const vixCost = fi(vix * 1.5)
   return {
     tier: 3, tierLabel: TIER_META[3].label, tierColor: TIER_META[3].color,
-    headline: 'BALANCED REGIME 2 — SPIKE HEDGE + DRIFT CARRY',
+    headline: 'SVXY LONG + UVXY SHORT + VXX SPREAD + HEDGE',
     legs: [
-      { action: 'BUY',   qty: '1 contract', instrument: 'VIX',  detail: `$${vStk}C · ${dte}DTE`,                     role: 'HEDGE'  },
-      { action: 'SHORT', qty: '50 shares',  instrument: 'UVXY', detail: `@ $${f2(uvxy)} · stop $${f2(uvxy * 1.20)}`, role: 'INCOME' },
-      { action: 'LONG',  qty: `${spySh} sh`, instrument: 'SPY', detail: `@ mkt · stop $${f1(spy * 0.99)}`,           role: 'CORE'   },
+      { action: 'SELL', qty: '1 contract',   instrument: 'UVXY', detail: `$${f2(uvxyStk)}C · ${dte}DTE`,               role: 'CORE'   },
+      { action: 'SELL', qty: '1 contract',   instrument: 'VXX',  detail: `$${f2(vxxStk)}C · ${dte}DTE`,                role: 'INCOME' },
+      { action: 'LONG', qty: `${svxyShs} sh`, instrument: 'SVXY', detail: `@ $${f2(svxy)} · stop $${f2(svxy * 0.88)}`, role: 'SCALE'  },
+      { action: 'BUY',  qty: '1 contract',   instrument: 'VIX',  detail: `$${vixStk}C · 45DTE (tail)`,                 role: 'HEDGE'  },
     ],
-    riskAmt: vCost + shRsk, targetAmt: vCost * 3 + shTgt,
-    rationale: `Three-way balanced position: VIX call = spike protection, UVXY short = carry income, SPY long = equity drift capture. SPY gains in calm; VIX call profits in escalation. UVXY stop +20%, SPY stop -1%.`,
+    riskAmt: uvxyCr * 2 + vxxCr * 2 + svxyRsk + vixCost,
+    targetAmt: uvxyCr + vxxCr + fi(svxyShs * svxy * 0.07),
+    rationale: `Full balanced Regime 2 book: UVXY + VXX call spreads extract carry from two products; SVXY light long adds drift income; VIX call provides tail protection. Four-way hedge — generates income in flat vol, protected against escalation. Conservative sizing for neutral regime.`,
     urgency,
   }
 }
@@ -394,17 +422,17 @@ function r3t4(p: P): TradeRec {
 // ─── REGIME 4 · VOLMAGEDDON PROTOCOL ─────────────────────────────────────────
 
 function r4t1(p: P): TradeRec {
-  const { spy, dte, urgency } = p
-  const stk  = strike(spy, 0.95)
-  const cost = fi(spy * 100 * 0.005)      // 5% OTM SPY put est.
+  const { svxy, dte, urgency } = p
+  const svxyPut = strike(svxy, 0.90)   // 10% OTM put — SVXY will drop in crisis
+  const cost = fi(svxy * 100 * 0.012)
   return {
     tier: 1, tierLabel: TIER_META[1].label, tierColor: TIER_META[1].color,
-    headline: 'SPY PUT — CRISIS TAIL HEDGE',
+    headline: 'SVXY PUTS — CRASH PROTECTION',
     legs: [
-      { action: 'BUY', qty: '1 contract', instrument: 'SPY', detail: `$${f1(stk)}P · ${Math.min(dte, 21)}DTE`, role: 'CORE' },
+      { action: 'BUY', qty: '1 contract', instrument: 'SVXY', detail: `$${f2(svxyPut)}P · ${Math.min(dte, 30)}DTE`, role: 'CORE' },
     ],
-    riskAmt: cost, targetAmt: cost * 5,
-    rationale: `Crisis protocol: single SPY put 5% OTM for defined-risk tail hedge. SPY $${f1(spy)}, target intrinsic if SPY drops to $${f1(spy * 0.85)}. Max loss est. $${cost}. R:R 1:5 in full panic scenario.`,
+    riskAmt: cost, targetAmt: cost * 6,
+    rationale: `Crisis protocol: SVXY put as crash protection — SVXY is short-vol ETN, will collapse in vol spike. SVXY $${f2(svxy)}, put strike $${f2(svxyPut)} (10% OTM). If VIX spikes 50%+, SVXY drops proportionally, put goes deep ITM. Max loss: est. $${cost}. R:R 1:6 in Volmageddon scenario.`,
     urgency,
   }
 }

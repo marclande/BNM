@@ -91,4 +91,447 @@
 
   /* VolSurface */
   .surfaceWrap { padding: 6px 16px 14px; overflow-x: auto; }
+
+  /* EtnProductPanel */
+  .etnGrid { grid-template-columns: repeat(2, 1fr); padding: 10px 16px 14px; }
+
+  /* RegimeAllocationMatrix */
+  .allocWrap { padding: 10px 16px 14px; overflow-x: auto; }
+
+  /* RelativeValueScanner */
+  .rvTable { padding: 0 16px; }
+  .rvDescCol { display: none; }
+  .rvDesc { display: none; }
+
+  /* MultiCarryBreakdown */
+  .mcGrid { grid-template-columns: repeat(2, 1fr); }
+
+  /* MultiPositionSpecs */
+  .mpWrap { grid-template-columns: repeat(2, 1fr); padding: 10px 16px 14px; }
+
+  /* ProductVolScan */
+  .pvsWrap { padding: 10px 16px 14px; }
+}
+
+/* ─── EtnProductPanel ──────────────────────────────────────────────────────── */
+
+.etnGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  padding: 10px 24px 14px;
+}
+
+.etnCard {
+  border: 1px solid var(--border-subtle);
+  border-radius: 5px;
+  padding: 12px 14px;
+  transition: border-color 0.3s, background 0.3s;
+}
+
+.etnCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.etnTicker {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.etnStatus {
+  font-family: var(--font-mono);
+  font-size: 7px;
+  letter-spacing: 0.12em;
+  padding: 2px 7px;
+  border-radius: 2px;
+  border: 1px solid;
+}
+
+.etnPrice {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.etnLeverage {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-tertiary);
+  letter-spacing: 0.08em;
+  margin-bottom: 10px;
+}
+
+.etnMeta {
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 8px;
+}
+
+.etnMetaRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 2px 0;
+}
+
+.etnMetaLabel {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  color: var(--text-tertiary);
+}
+
+.etnMetaVal {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.etnNote {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--text-muted);
+  margin-top: 7px;
+  letter-spacing: 0.06em;
+}
+
+/* ─── RegimeAllocationMatrix ───────────────────────────────────────────────── */
+
+.allocWrap { padding: 10px 24px 14px; }
+
+.allocGrid {
+  display: grid;
+  grid-template-columns: 160px repeat(4, 1fr);
+  gap: 3px;
+}
+
+.allocCorner { }
+.allocColHeader {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  color: var(--text-secondary);
+  text-align: center;
+  padding: 4px 0;
+}
+
+.allocRowLabel {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+  display: flex;
+  align-items: center;
+  padding-right: 8px;
+}
+
+.allocCell {
+  border-radius: 3px;
+  padding: 6px 4px;
+  text-align: center;
+  min-height: 42px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.allocWeight {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.allocBias {
+  font-family: var(--font-mono);
+  font-size: 7px;
+  letter-spacing: 0.1em;
+}
+
+.allocLegend {
+  display: flex;
+  gap: 16px;
+  margin-top: 10px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+}
+
+/* ─── RelativeValueScanner ─────────────────────────────────────────────────── */
+
+.rvWrap { padding: 6px 24px 14px; }
+
+.rvTable {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rvHeader {
+  display: grid;
+  grid-template-columns: 180px 80px 140px 70px 1fr;
+  gap: 8px;
+  padding: 4px 10px;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  color: var(--text-tertiary);
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 4px;
+}
+
+.rvRow {
+  display: grid;
+  grid-template-columns: 180px 80px 140px 70px 1fr;
+  gap: 8px;
+  align-items: center;
+  padding: 7px 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+}
+
+.rvLabel {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.rvSpread {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  text-align: right;
+}
+
+.rvZCell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rvZBar {
+  flex: 1;
+  height: 8px;
+  background: var(--bg-tertiary);
+  border-radius: 2px;
+  overflow: hidden;
+  display: flex;
+}
+
+.rvZFill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.4s;
+  min-width: 2px;
+}
+
+.rvZVal {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  min-width: 38px;
+  text-align: right;
+}
+
+.rvSignal {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+.rvDescCol { }
+.rvDesc {
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.rvNote {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-tertiary);
+  margin-top: 8px;
+  padding: 0 10px;
+  letter-spacing: 0.06em;
+}
+
+/* ─── MultiCarryBreakdown ──────────────────────────────────────────────────── */
+
+.mcWrap { padding: 10px 24px 14px; }
+
+.mcGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.mcItem {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  padding: 9px 11px;
+}
+
+.mcLabel {
+  font-family: var(--font-mono);
+  font-size: 7px;
+  letter-spacing: 0.15em;
+  color: var(--text-tertiary);
+  margin-bottom: 5px;
+}
+
+.mcVal {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.mcSub {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--text-tertiary);
+  margin-top: 3px;
+}
+
+.mcBar { }
+
+.mcBarLabel {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  color: var(--text-tertiary);
+  margin-bottom: 5px;
+}
+
+.mcBarTrack {
+  height: 10px;
+  background: var(--bg-tertiary);
+  border-radius: 3px;
+  overflow: hidden;
+  display: flex;
+}
+
+.mcBarSeg {
+  height: 100%;
+  transition: width 0.4s;
+}
+
+.mcBarLegend {
+  display: flex;
+  gap: 14px;
+  margin-top: 6px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-secondary);
+}
+
+/* ─── MultiPositionSpecs ───────────────────────────────────────────────────── */
+
+.mpWrap {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  padding: 10px 24px 14px;
+}
+
+.mpCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 5px;
+  padding: 12px 14px;
+}
+
+.mpCardHeader {
+  margin-bottom: 8px;
+}
+
+.mpTicker {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+/* ─── ProductVolScan ───────────────────────────────────────────────────────── */
+
+.pvsWrap {
+  padding: 10px 24px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pvsRow {
+  display: grid;
+  grid-template-columns: 60px 1fr 280px;
+  gap: 12px;
+  align-items: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  padding: 9px 14px;
+}
+
+.pvsTicker {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+.pvsBar {
+  height: 10px;
+  background: var(--bg-tertiary);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.pvsBarFill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+.pvsStats {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.pvsVol {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+
+.pvsGrade {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  min-width: 36px;
+}
+
+.pvsSellZone {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+
+.pvsNote {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-tertiary);
+  padding: 0 4px;
+  letter-spacing: 0.06em;
 }

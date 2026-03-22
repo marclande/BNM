@@ -73,6 +73,7 @@ export default function TradeRecommendations({ state, regime, lookupOption }: Pr
   const windows: WindowRecs[] = buildAllWindowRecs(
     state.vix, state.spx, state.uvxy,
     state.acctK, state.maxRiskPct, regime,
+    state.uvix, state.svxy, state.vxx,
   )
 
   const active = windows.find(w => w.window === activeWindow) ?? windows[0]

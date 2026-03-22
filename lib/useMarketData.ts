@@ -13,7 +13,8 @@ export interface FeedState {
 }
 
 interface QuotePayload {
-  vix?: number; vix3m?: number; vvix?: number; spx?: number; uvxy?: number
+  vix?: number; vix3m?: number; vvix?: number; spx?: number
+  uvxy?: number; uvix?: number; svxy?: number; vxx?: number
   marketState?: string
   partial?: boolean
   error?: string
@@ -45,6 +46,15 @@ export function useMarketData(
       if (data.vvix  != null) update('vvix',  +data.vvix.toFixed(0))
       if (data.spx   != null) update('spx',   +data.spx.toFixed(0))
       if (data.uvxy  != null) update('uvxy',  +data.uvxy.toFixed(2))
+      // Derived estimates when server doesn't supply these tickers
+      const uvxy = data.uvxy ?? 0
+      const vix  = data.vix  ?? 0
+      if (data.uvix != null) update('uvix', +data.uvix.toFixed(2))
+      else if (uvxy > 0)     update('uvix', +( uvxy * 0.92).toFixed(2))
+      if (data.svxy != null) update('svxy', +data.svxy.toFixed(2))
+      else if (uvxy > 0)     update('svxy', +Math.max(8, 95 - uvxy * 0.42).toFixed(2))
+      if (data.vxx  != null) update('vxx',  +data.vxx.toFixed(2))
+      else if (vix  > 0)     update('vxx',  +( vix  * 1.88).toFixed(2))
 
       const ms = data.marketState ?? 'UNKNOWN'
       setMarketState(ms)

@@ -188,6 +188,9 @@ const FIELDS: [string, keyof DashState, number][] = [
   ['VVIX',  'vvix',  1],
   ['SPX',   'spx',   1],
   ['UVXY',  'uvxy',  0.01],
+  ['UVIX',  'uvix',  0.01],
+  ['SVXY',  'svxy',  0.01],
+  ['VXX',   'vxx',   0.01],
 ]
 
 function MarketInputs({
