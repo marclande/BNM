@@ -11,9 +11,9 @@ export async function GET(req: NextRequest) {
   const endpoint = searchParams.get('endpoint') ?? 'stock/history/eod'
 
   const params = new URLSearchParams()
-  for (const [k, v] of searchParams.entries()) {
+  searchParams.forEach((v, k) => {
     if (k !== 'endpoint') params.set(k, v)
-  }
+  })
 
   try {
     const url = `${THETA_BASE}/${endpoint}?${params}`
