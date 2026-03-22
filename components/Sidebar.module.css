@@ -28,6 +28,88 @@
   border-bottom: 1px solid var(--border-subtle);
 }
 
+/* ── Feed status section ──────────────────────────────────────── */
+.feedRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.feedStatus {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+}
+
+.refreshBtn {
+  background: none;
+  border: 1px solid var(--border-subtle);
+  border-radius: 2px;
+  color: var(--text-tertiary);
+  font-size: 12px;
+  width: 22px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s, border-color 0.2s;
+}
+.refreshBtn:hover { color: var(--text-primary); border-color: var(--border-muted); }
+
+.feedMeta {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-tertiary);
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+}
+
+.oratsRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+
+.oratsLabel {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  color: var(--text-tertiary);
+}
+
+.oratsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.oratsStat {
+  background: var(--bg-secondary);
+  border-radius: 3px;
+  padding: 5px 6px;
+}
+
+.oratsStatLabel {
+  font-family: var(--font-mono);
+  font-size: 7px;
+  letter-spacing: 0.1em;
+  color: var(--text-tertiary);
+  margin-bottom: 2px;
+}
+
+.oratsStatVal {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
 .label {
   font-family: var(--font-mono);
   font-size: 9px;

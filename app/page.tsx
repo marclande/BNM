@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import styles from './page.module.css'
+import { useMarketData } from '@/lib/useMarketData'
 import {
   classifyRegime, regimeConfidence, calcCarry,
   buildTermStructure, buildVolSurface, REGIMES,
@@ -47,12 +48,14 @@ export default function Page() {
     setState(prev => ({ ...prev, [key]: val }))
   }, [])
 
+  const feedState = useMarketData(update)
+
   return (
     <div className={styles.app}>
       <Topbar regime={regime} R={R} carry={carry} onMenuClick={() => setSidebarOpen(o => !o)} />
       {sidebarOpen && <div className={styles.overlay} onClick={() => setSidebarOpen(false)} />}
       <div className={styles.layout}>
-        <Sidebar state={state} update={update} regime={regime} carry={carry} R={R} isOpen={sidebarOpen} />
+        <Sidebar state={state} update={update} regime={regime} carry={carry} R={R} isOpen={sidebarOpen} feedState={feedState} />
         <main className={styles.content}>
           <RegimePanel regime={regime} R={R} confidence={confidence} ratio={ratio} vvix={state.vvix} vix={state.vix} />
           <div className={styles.scrollArea}>
