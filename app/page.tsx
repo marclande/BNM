@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react'
 import styles from './page.module.css'
 import { useMarketData } from '@/lib/useMarketData'
+import { useThetaData } from '@/lib/useThetaData'
 import {
   classifyRegime, regimeConfidence, calcCarry,
   buildTermStructure, buildVolSurface, REGIMES,
@@ -48,19 +49,20 @@ export default function Page() {
     setState(prev => ({ ...prev, [key]: val }))
   }, [])
 
-  const feedState = useMarketData(update)
+  const feedState  = useMarketData(update)
+  const thetaState = useThetaData(state.uvxy)
 
   return (
     <div className={styles.app}>
       <Topbar regime={regime} R={R} carry={carry} onMenuClick={() => setSidebarOpen(o => !o)} />
       {sidebarOpen && <div className={styles.overlay} onClick={() => setSidebarOpen(false)} />}
       <div className={styles.layout}>
-        <Sidebar state={state} update={update} regime={regime} carry={carry} R={R} isOpen={sidebarOpen} feedState={feedState} />
+        <Sidebar state={state} update={update} regime={regime} carry={carry} R={R} isOpen={sidebarOpen} feedState={feedState} thetaState={thetaState} />
         <main className={styles.content}>
           <RegimePanel regime={regime} R={R} confidence={confidence} ratio={ratio} vvix={state.vvix} vix={state.vix} />
           <div className={styles.scrollArea}>
             <Section label="Daily Trade Recommendations — 4 Windows · 4 Risk Tiers">
-              <TradeRecommendations state={state} regime={regime} />
+              <TradeRecommendations state={state} regime={regime} lookupOption={thetaState.lookupOption} />
             </Section>
             <Section label="VIX Term Structure">
               <TermStructureChart points={termStructure} regime={regime} ratio={ratio} />

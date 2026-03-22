@@ -4,15 +4,17 @@ import styles from './Sidebar.module.css'
 import { type RegimeId, type RegimeConfig, type CarryResult } from '@/lib/regime'
 import { type DashState } from '@/app/page'
 import { type FeedState } from '@/lib/useMarketData'
+import { type ThetaState } from '@/lib/useThetaData'
 
 interface Props {
-  state:     DashState
-  update:    (key: keyof DashState, val: number) => void
-  regime:    RegimeId
-  carry:     CarryResult
-  R:         RegimeConfig
-  isOpen:    boolean
-  feedState: FeedState
+  state:      DashState
+  update:     (key: keyof DashState, val: number) => void
+  regime:     RegimeId
+  carry:      CarryResult
+  R:          RegimeConfig
+  isOpen:     boolean
+  feedState:  FeedState
+  thetaState: ThetaState
 }
 
 const STATUS_COLOR: Record<FeedState['status'], string> = {
@@ -29,7 +31,7 @@ const STATUS_LABEL: Record<FeedState['status'], string> = {
   loading: '○ LOADING',
 }
 
-export default function Sidebar({ state, update, regime, carry, R, isOpen, feedState }: Props) {
+export default function Sidebar({ state, update, regime, carry, R, isOpen, feedState, thetaState }: Props) {
   const carryPct = (carry.netCarryPct * 100).toFixed(2)
   const barWidth = Math.min(100, Math.max(2, 50 + carry.netCarryPct * 2500))
 
@@ -43,63 +45,58 @@ export default function Sidebar({ state, update, regime, carry, R, isOpen, feedS
   return (
     <aside className={`${styles.sidebar} ${isOpen ? styles.sidebarOpen : ''}`}>
 
-      {/* ── Data Feed Status ───────────────────────────────────────── */}
+      {/* ── Data Feed ─────────────────────────────────────────────── */}
       <div className={styles.section}>
         <div className={styles.feedRow}>
-          <span
-            className={styles.feedStatus}
-            style={{ color: STATUS_COLOR[feedState.status] }}
-          >
+          <span className={styles.feedStatus} style={{ color: STATUS_COLOR[feedState.status] }}>
             {STATUS_LABEL[feedState.status]}
           </span>
-          <button className={styles.refreshBtn} onClick={feedState.refresh} title="Refresh quotes">
-            ↻
-          </button>
+          <button className={styles.refreshBtn} onClick={feedState.refresh} title="Refresh quotes">↻</button>
         </div>
-
         {lastStr && (
           <div className={styles.feedMeta}>
-            {lastStr}
-            {feedState.status === 'delayed' && ' · 15m delay'}
+            {lastStr}{feedState.status === 'delayed' && ' · 15m delay'}
           </div>
         )}
 
-        {/* ORATS status */}
-        <div className={styles.oratsRow}>
-          <span className={styles.oratsLabel}>ORATS</span>
-          {feedState.oratsReady ? (
-            <span style={{ color: 'var(--positive)', fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.12em' }}>
-              ● CONNECTED
-            </span>
+        {/* ThetaData options feed */}
+        <div className={styles.thetaRow}>
+          <span className={styles.thetaLabel}>THETADATA</span>
+          {!thetaState.configured ? (
+            <span className={styles.thetaBadge} style={{ color: 'var(--text-muted)' }}>○ KEY NEEDED</span>
+          ) : thetaState.connected ? (
+            <span className={styles.thetaBadge} style={{ color: 'var(--positive)' }}>● LIVE</span>
           ) : (
-            <span style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.12em' }}>
-              ○ KEY NEEDED
-            </span>
+            <span className={styles.thetaBadge} style={{ color: 'var(--warning)' }}>◑ CONNECTING</span>
           )}
         </div>
 
-        {/* ORATS IV summary when available */}
-        {feedState.oratsReady && feedState.oratsSummary && (
-          <div className={styles.oratsGrid}>
-            <div className={styles.oratsStat}>
-              <div className={styles.oratsStatLabel}>IV30</div>
-              <div className={styles.oratsStatVal}>{feedState.oratsSummary.iv30.toFixed(0)}%</div>
-            </div>
-            <div className={styles.oratsStat}>
-              <div className={styles.oratsStatLabel}>IVR</div>
-              <div className={styles.oratsStatVal}
-                style={{ color: feedState.oratsSummary.ivr30 > 60 ? 'var(--positive)' : feedState.oratsSummary.ivr30 < 30 ? 'var(--negative)' : 'var(--text-secondary)' }}>
-                {feedState.oratsSummary.ivr30.toFixed(0)}
+        {/* UVXY ATM stats when ThetaData is live */}
+        {thetaState.connected && (thetaState.atmIv || thetaState.atmDelta) && (
+          <div className={styles.thetaGrid}>
+            {thetaState.atmIv != null && (
+              <div className={styles.thetaStat}>
+                <div className={styles.thetaStatLabel}>UVXY IV</div>
+                <div className={styles.thetaStatVal}
+                  style={{ color: thetaState.atmIv > 120 ? 'var(--negative)' : thetaState.atmIv < 80 ? 'var(--positive)' : 'var(--text-primary)' }}>
+                  {thetaState.atmIv.toFixed(0)}%
+                </div>
               </div>
-            </div>
-            <div className={styles.oratsStat}>
-              <div className={styles.oratsStatLabel}>IVP</div>
-              <div className={styles.oratsStatVal}>{feedState.oratsSummary.ivp30.toFixed(0)}</div>
-            </div>
-            <div className={styles.oratsStat}>
-              <div className={styles.oratsStatLabel}>FWD</div>
-              <div className={styles.oratsStatVal}>${feedState.oratsSummary.fwdPx.toFixed(2)}</div>
-            </div>
+            )}
+            {thetaState.atmDelta != null && (
+              <div className={styles.thetaStat}>
+                <div className={styles.thetaStatLabel}>ATM Δ</div>
+                <div className={styles.thetaStatVal}>{thetaState.atmDelta.toFixed(2)}</div>
+              </div>
+            )}
+            {thetaState.atmTheta != null && (
+              <div className={styles.thetaStat}>
+                <div className={styles.thetaStatLabel}>ATM Θ/d</div>
+                <div className={styles.thetaStatVal} style={{ color: 'var(--negative)' }}>
+                  ${thetaState.atmTheta.toFixed(2)}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

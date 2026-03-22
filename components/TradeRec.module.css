@@ -121,6 +121,28 @@
 .legQty    { color: var(--text-secondary); min-width: 90px; }
 .legInst   { color: var(--text-primary);   font-weight: 500; min-width: 50px; }
 .legDetail { color: var(--text-secondary); width: 100%; }
+
+/* Live ThetaData pricing column */
+.legLive {
+  text-align: right;
+  padding: 5px 14px 5px 6px;
+  white-space: nowrap;
+}
+.legMid {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-right: 6px;
+}
+.legGreek {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  color: var(--text-tertiary);
+  margin-right: 4px;
+}
+
 .legRole   {
   text-align: right;
   font-size: 8px;
