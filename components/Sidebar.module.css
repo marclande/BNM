@@ -154,6 +154,46 @@
 }
 .input:focus { border-color: var(--border-active); }
 
+.labelRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.autoTag {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  border: 1px solid;
+  border-radius: 2px;
+  padding: 1px 5px;
+}
+
+.inputWrap {
+  display: flex;
+  align-items: center;
+}
+
+.liveVal {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  background: var(--bg-input);
+  border: 1px solid;
+  border-radius: 3px;
+  padding: 4px 8px;
+  width: 90px;
+  text-align: right;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  transition: background 0.15s;
+}
+.liveVal:hover { background: var(--bg-secondary); }
+
 .carryHeader {
   display: flex;
   justify-content: space-between;

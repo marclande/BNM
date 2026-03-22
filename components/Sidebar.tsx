@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import styles from './Sidebar.module.css'
 import { type RegimeId, type RegimeConfig, type CarryResult } from '@/lib/regime'
 import { type DashState } from '@/app/page'
@@ -102,27 +103,7 @@ export default function Sidebar({ state, update, regime, carry, R, isOpen, feedS
       </div>
 
       {/* ── Market Inputs ──────────────────────────────────────────── */}
-      <div className={styles.section}>
-        <div className={styles.label}>Market Inputs</div>
-        {([
-          ['VIX', 'vix', 0.1],
-          ['VIX3M', 'vix3m', 0.1],
-          ['VVIX', 'vvix', 1],
-          ['SPX', 'spx', 1],
-          ['UVXY', 'uvxy', 0.01],
-        ] as [string, keyof DashState, number][]).map(([label, key, step]) => (
-          <div className={styles.inputRow} key={key}>
-            <span className={styles.inputLabel}>{label}</span>
-            <input
-              className={styles.input}
-              type="number"
-              step={step}
-              value={state[key]}
-              onChange={e => update(key, parseFloat(e.target.value) || 0)}
-            />
-          </div>
-        ))}
-      </div>
+      <MarketInputs state={state} update={update} feedState={feedState} />
 
       {/* ── Account Config ─────────────────────────────────────────── */}
       <div className={styles.section}>
@@ -198,5 +179,79 @@ export default function Sidebar({ state, update, regime, carry, R, isOpen, feedS
       </div>
 
     </aside>
+  )
+}
+
+const FIELDS: [string, keyof DashState, number][] = [
+  ['VIX',   'vix',   0.1],
+  ['VIX3M', 'vix3m', 0.1],
+  ['VVIX',  'vvix',  1],
+  ['SPX',   'spx',   1],
+  ['UVXY',  'uvxy',  0.01],
+]
+
+function MarketInputs({
+  state, update, feedState,
+}: {
+  state: DashState
+  update: (key: keyof DashState, val: number) => void
+  feedState: FeedState
+}) {
+  const [editing, setEditing] = useState<Set<keyof DashState>>(new Set())
+  const isAuto = feedState.status === 'live' || feedState.status === 'delayed'
+  const dotColor = feedState.status === 'live' ? 'var(--positive)' : 'var(--warning)'
+
+  function toggleEdit(key: keyof DashState) {
+    setEditing(prev => {
+      const next = new Set(prev)
+      next.has(key) ? next.delete(key) : next.add(key)
+      return next
+    })
+  }
+
+  return (
+    <div className={styles.section}>
+      <div className={styles.labelRow}>
+        <span className={styles.label} style={{ marginBottom: 0 }}>Market Inputs</span>
+        {isAuto && (
+          <span className={styles.autoTag} style={{ color: dotColor, borderColor: dotColor }}>
+            AUTO
+          </span>
+        )}
+      </div>
+      <div style={{ marginTop: 10 }}>
+        {FIELDS.map(([label, key, step]) => {
+          const isEditingThis = editing.has(key) || !isAuto
+          return (
+            <div className={styles.inputRow} key={key}>
+              <span className={styles.inputLabel}>{label}</span>
+              {isEditingThis ? (
+                <div className={styles.inputWrap}>
+                  <input
+                    className={styles.input}
+                    type="number"
+                    step={step}
+                    value={state[key]}
+                    onChange={e => update(key, parseFloat(e.target.value) || 0)}
+                    autoFocus={isAuto}
+                    onBlur={() => isAuto && toggleEdit(key)}
+                  />
+                </div>
+              ) : (
+                <button
+                  className={styles.liveVal}
+                  style={{ borderColor: dotColor + '44' }}
+                  onClick={() => toggleEdit(key)}
+                  title="Click to override"
+                >
+                  <span style={{ color: dotColor, fontSize: 7, marginRight: 4 }}>●</span>
+                  {state[key]}
+                </button>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    </div>
   )
 }
