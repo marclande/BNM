@@ -2,48 +2,22 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
 
-const THETA_BASE = 'https://api.thetadata.us/v2'
-
-// Support two auth methods — set whichever matches your plan in Vercel env vars:
-//   THETADATA_KEY      → x-api-key header  (newer plans / cloud API key)
-//   THETADATA_USERNAME + THETADATA_PASSWORD → HTTP Basic auth (ThetaTerminal credentials)
-const API_KEY  = process.env.THETADATA_KEY
-const USERNAME = process.env.THETADATA_USERNAME
-const PASSWORD = process.env.THETADATA_PASSWORD
-
-function isConfigured() {
-  return !!API_KEY || (!!USERNAME && !!PASSWORD)
-}
-
-function authHeaders(): HeadersInit {
-  if (API_KEY) return { 'x-api-key': API_KEY }
-  if (USERNAME && PASSWORD) {
-    const b64 = Buffer.from(`${USERNAME}:${PASSWORD}`).toString('base64')
-    return { 'Authorization': `Basic ${b64}` }
-  }
-  return {}
-}
+// ThetaTerminal v3 running on Droplet — override via THETADATA_HOST env var
+const THETA_HOST = process.env.THETADATA_HOST ?? 'http://174.138.57.123:25503'
+const THETA_BASE = `${THETA_HOST}/v3`
 
 export async function GET(req: NextRequest) {
-  if (!isConfigured()) {
-    return NextResponse.json({ configured: false, data: null })
-  }
-
   const { searchParams } = req.nextUrl
-  const endpoint = searchParams.get('endpoint') ?? 'bulk_snapshot/option/quote'
+  const endpoint = searchParams.get('endpoint') ?? 'stock/history/eod'
 
-  // Forward remaining params to ThetaData (e.g. root=UVXY, exp=...)
-  const params = new URLSearchParams({ use_csv: 'false' })
+  const params = new URLSearchParams()
   for (const [k, v] of searchParams.entries()) {
     if (k !== 'endpoint') params.set(k, v)
   }
 
   try {
     const url = `${THETA_BASE}/${endpoint}?${params}`
-    const res = await fetch(url, {
-      headers: { ...authHeaders(), 'Accept': 'application/json' },
-      next: { revalidate: 0 },
-    })
+    const res = await fetch(url, { next: { revalidate: 0 } })
 
     if (!res.ok) {
       const text = await res.text()
@@ -53,8 +27,16 @@ export async function GET(req: NextRequest) {
       )
     }
 
-    const json = await res.json()
-    return NextResponse.json({ configured: true, data: json })
+    // Terminal returns CSV — parse into array of objects
+    const text = await res.text()
+    const lines = text.trim().split('\n')
+    const headers = lines[0].split(',')
+    const data = lines.slice(1).map(line => {
+      const vals = line.split(',')
+      return Object.fromEntries(headers.map((h, i) => [h, vals[i]]))
+    })
+
+    return NextResponse.json({ configured: true, data })
   } catch (err) {
     return NextResponse.json(
       { configured: true, data: null, error: String(err) },
