@@ -115,7 +115,7 @@ function buildLookup(chain: ThetaOptionRecord[]): LookupFn {
     if (filtered.length === 0) return null
 
     // Step 1: find the best expiry (closest DTE to target)
-    const expiries = [...new Set(filtered.map(o => o.dte))]
+    const expiries = Array.from(new Set(filtered.map(o => o.dte)))
     const bestDTE  = expiries.reduce((a, b) =>
       Math.abs(a - targetDTE) <= Math.abs(b - targetDTE) ? a : b
     )
