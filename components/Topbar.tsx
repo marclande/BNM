@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import styles from './Topbar.module.css'
 import { type RegimeId, type RegimeConfig, type CarryResult } from '@/lib/regime'
 
@@ -55,6 +56,14 @@ export default function Topbar({ regime, R, carry, onMenuClick }: Props) {
         <div className={styles.carryPill} style={{ color: carry.isPositive ? 'var(--positive)' : 'var(--negative)' }}>
           CARRY {carry.isPositive ? '+' : ''}{(carry.netCarryPct * 100).toFixed(2)}% / MO
         </div>
+        <Link href="/backtest" style={{
+          fontSize: 9, letterSpacing: '0.16em', color: '#4a5468',
+          border: '1px solid rgba(255,255,255,0.08)', borderRadius: 3,
+          padding: '3px 9px', textDecoration: 'none',
+          fontFamily: 'monospace',
+        }}>
+          BACKTEST
+        </Link>
         <div className={styles.sessionBadge}>{session}</div>
         <div className={styles.clock}>{time}</div>
       </div>

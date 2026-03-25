@@ -21,5 +21,5 @@ export async function middleware(req: NextRequest) {
 
 // Only protect the data API routes — not /api/auth (login endpoint)
 export const config = {
-  matcher: ['/api/quotes', '/api/thetadata', '/api/etf-prices'],
+  matcher: ['/api/quotes', '/api/thetadata', '/api/etf-prices', '/api/backtest-data'],
 }
