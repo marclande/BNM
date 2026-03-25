@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { IBM_Plex_Mono, IBM_Plex_Sans } from 'next/font/google'
 import './globals.css'
+import PasswordGate from '@/components/PasswordGate'
 
 const ibmPlexSans = IBM_Plex_Sans({
   subsets: ['latin'],
@@ -31,7 +32,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${ibmPlexSans.variable} ${ibmPlexMono.variable}`}>
-      <body>{children}</body>
+      <body>
+        <PasswordGate>{children}</PasswordGate>
+      </body>
     </html>
   )
 }
