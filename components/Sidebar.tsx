@@ -182,15 +182,16 @@ export default function Sidebar({ state, update, regime, carry, R, isOpen, feedS
   )
 }
 
-const FIELDS: [string, keyof DashState, number][] = [
+// manualOnly=true means the quotes server never auto-feeds this ticker
+const FIELDS: [string, keyof DashState, number, boolean?][] = [
   ['VIX',   'vix',   0.1],
   ['VIX3M', 'vix3m', 0.1],
   ['VVIX',  'vvix',  1],
   ['SPX',   'spx',   1],
   ['UVXY',  'uvxy',  0.01],
-  ['UVIX',  'uvix',  0.01],
-  ['SVXY',  'svxy',  0.01],
-  ['VXX',   'vxx',   0.01],
+  ['UVIX',  'uvix',  0.01, true],
+  ['SVXY',  'svxy',  0.01, true],
+  ['VXX',   'vxx',   0.01, true],
 ]
 
 function MarketInputs({
@@ -223,11 +224,18 @@ function MarketInputs({
         )}
       </div>
       <div style={{ marginTop: 10 }}>
-        {FIELDS.map(([label, key, step]) => {
-          const isEditingThis = editing.has(key) || !isAuto
+        {FIELDS.map(([label, key, step, manualOnly]) => {
+          const isEditingThis = editing.has(key) || !isAuto || manualOnly
           return (
             <div className={styles.inputRow} key={key}>
-              <span className={styles.inputLabel}>{label}</span>
+              <span className={styles.inputLabel}>
+                {label}
+                {manualOnly && (
+                  <span style={{ marginLeft: 4, fontSize: 7, letterSpacing: '0.1em', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                    MANUAL
+                  </span>
+                )}
+              </span>
               {isEditingThis ? (
                 <div className={styles.inputWrap}>
                   <input
@@ -236,8 +244,8 @@ function MarketInputs({
                     step={step}
                     value={state[key]}
                     onChange={e => update(key, parseFloat(e.target.value) || 0)}
-                    autoFocus={isAuto}
-                    onBlur={() => isAuto && toggleEdit(key)}
+                    autoFocus={isAuto && !manualOnly}
+                    onBlur={() => (isAuto && !manualOnly) && toggleEdit(key)}
                   />
                 </div>
               ) : (
