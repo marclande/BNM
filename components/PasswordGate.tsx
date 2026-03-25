@@ -2,9 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react'
 
-const KEY = 'dvd_auth'
-const CORRECT = 'damianmarley'
-
 export default function PasswordGate({ children }: { children: React.ReactNode }) {
   const [unlocked, setUnlocked] = useState(false)
   const [input, setInput]       = useState('')
@@ -13,16 +10,22 @@ export default function PasswordGate({ children }: { children: React.ReactNode }
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    if (sessionStorage.getItem(KEY) === '1') {
-      setUnlocked(true)
-    }
-    setReady(true)
-    setTimeout(() => inputRef.current?.focus(), 80)
+    // Check if a valid session cookie already exists
+    fetch('/api/auth')
+      .then(r => { if (r.ok) setUnlocked(true) })
+      .finally(() => {
+        setReady(true)
+        setTimeout(() => inputRef.current?.focus(), 80)
+      })
   }, [])
 
-  function attempt() {
-    if (input.toLowerCase().trim() === CORRECT) {
-      sessionStorage.setItem(KEY, '1')
+  async function attempt() {
+    const res = await fetch('/api/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: input }),
+    })
+    if (res.ok) {
       setUnlocked(true)
       setError(false)
     } else {
