@@ -4,18 +4,19 @@ import { useState } from 'react'
 import styles from './Sidebar.module.css'
 import { type RegimeId, type RegimeConfig, type CarryResult } from '@/lib/regime'
 import { type DashState } from '@/app/page'
-import { type FeedState } from '@/lib/useMarketData'
+import { type FeedState, type EtfFeedState } from '@/lib/useMarketData'
 import { type ThetaState } from '@/lib/useThetaData'
 
 interface Props {
-  state:      DashState
-  update:     (key: keyof DashState, val: number) => void
-  regime:     RegimeId
-  carry:      CarryResult
-  R:          RegimeConfig
-  isOpen:     boolean
-  feedState:  FeedState
-  thetaState: ThetaState
+  state:         DashState
+  update:        (key: keyof DashState, val: number) => void
+  regime:        RegimeId
+  carry:         CarryResult
+  R:             RegimeConfig
+  isOpen:        boolean
+  feedState:     FeedState
+  etfFeedState:  EtfFeedState
+  thetaState:    ThetaState
 }
 
 const STATUS_COLOR: Record<FeedState['status'], string> = {
@@ -32,7 +33,7 @@ const STATUS_LABEL: Record<FeedState['status'], string> = {
   loading: '○ LOADING',
 }
 
-export default function Sidebar({ state, update, regime, carry, R, isOpen, feedState, thetaState }: Props) {
+export default function Sidebar({ state, update, regime, carry, R, isOpen, feedState, etfFeedState, thetaState }: Props) {
   const carryPct = (carry.netCarryPct * 100).toFixed(2)
   const barWidth = Math.min(100, Math.max(2, 50 + carry.netCarryPct * 2500))
 
@@ -72,6 +73,18 @@ export default function Sidebar({ state, update, regime, carry, R, isOpen, feedS
           )}
         </div>
 
+        {/* ETF price feed status */}
+        <div className={styles.thetaRow}>
+          <span className={styles.thetaLabel}>ETF PRICES</span>
+          <span className={styles.thetaBadge} style={{ color:
+            etfFeedState.status === 'live'    ? 'var(--positive)' :
+            etfFeedState.status === 'partial' ? 'var(--warning)'  : 'var(--text-muted)' }}>
+            {etfFeedState.status === 'live'    ? '● LIVE'    :
+             etfFeedState.status === 'partial' ? '◑ PARTIAL' :
+             etfFeedState.status === 'loading' ? '○ LOADING' : '○ MANUAL'}
+          </span>
+        </div>
+
         {/* UVXY ATM stats when ThetaData is live */}
         {thetaState.connected && (thetaState.atmIv || thetaState.atmDelta) && (
           <div className={styles.thetaGrid}>
@@ -103,7 +116,7 @@ export default function Sidebar({ state, update, regime, carry, R, isOpen, feedS
       </div>
 
       {/* ── Market Inputs ──────────────────────────────────────────── */}
-      <MarketInputs state={state} update={update} feedState={feedState} />
+      <MarketInputs state={state} update={update} feedState={feedState} etfFeedState={etfFeedState} />
 
       {/* ── Account Config ─────────────────────────────────────────── */}
       <div className={styles.section}>
@@ -195,15 +208,18 @@ const FIELDS: [string, keyof DashState, number, boolean?][] = [
 ]
 
 function MarketInputs({
-  state, update, feedState,
+  state, update, feedState, etfFeedState,
 }: {
   state: DashState
   update: (key: keyof DashState, val: number) => void
   feedState: FeedState
+  etfFeedState: EtfFeedState
 }) {
   const [editing, setEditing] = useState<Set<keyof DashState>>(new Set())
-  const isAuto = feedState.status === 'live' || feedState.status === 'delayed'
-  const dotColor = feedState.status === 'live' ? 'var(--positive)' : 'var(--warning)'
+  const isAuto    = feedState.status === 'live' || feedState.status === 'delayed'
+  const etfIsAuto = etfFeedState.status === 'live' || etfFeedState.status === 'partial'
+  const dotColor  = feedState.status === 'live' ? 'var(--positive)' : 'var(--warning)'
+  const etfDotColor = etfFeedState.status === 'live' ? 'var(--positive)' : 'var(--warning)'
 
   function toggleEdit(key: keyof DashState) {
     setEditing(prev => {
@@ -225,14 +241,23 @@ function MarketInputs({
       </div>
       <div style={{ marginTop: 10 }}>
         {FIELDS.map(([label, key, step, manualOnly]) => {
-          const isEditingThis = editing.has(key) || !isAuto || manualOnly
+          const fieldIsAuto   = manualOnly ? etfIsAuto : isAuto
+          const fieldDotColor = manualOnly ? etfDotColor : dotColor
+          const isEditingThis = editing.has(key) || !fieldIsAuto
+          const badgeLabel    = manualOnly
+            ? (etfIsAuto ? (etfFeedState.status === 'live' ? 'LIVE' : 'YF') : 'MANUAL')
+            : null
+          const badgeColor    = manualOnly
+            ? (etfIsAuto ? fieldDotColor : 'var(--text-muted)')
+            : null
+
           return (
             <div className={styles.inputRow} key={key}>
               <span className={styles.inputLabel}>
                 {label}
-                {manualOnly && (
-                  <span style={{ marginLeft: 4, fontSize: 7, letterSpacing: '0.1em', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
-                    MANUAL
+                {badgeLabel && (
+                  <span style={{ marginLeft: 4, fontSize: 7, letterSpacing: '0.1em', color: badgeColor!, fontFamily: 'var(--font-mono)' }}>
+                    {badgeLabel}
                   </span>
                 )}
               </span>
@@ -244,18 +269,18 @@ function MarketInputs({
                     step={step}
                     value={state[key]}
                     onChange={e => update(key, parseFloat(e.target.value) || 0)}
-                    autoFocus={isAuto && !manualOnly}
-                    onBlur={() => (isAuto && !manualOnly) && toggleEdit(key)}
+                    autoFocus={false}
+                    onBlur={() => fieldIsAuto && toggleEdit(key)}
                   />
                 </div>
               ) : (
                 <button
                   className={styles.liveVal}
-                  style={{ borderColor: dotColor + '44' }}
+                  style={{ borderColor: fieldDotColor + '44' }}
                   onClick={() => toggleEdit(key)}
                   title="Click to override"
                 >
-                  <span style={{ color: dotColor, fontSize: 7, marginRight: 4 }}>●</span>
+                  <span style={{ color: fieldDotColor, fontSize: 7, marginRight: 4 }}>●</span>
                   {state[key]}
                 </button>
               )}

@@ -26,6 +26,58 @@ function isETMarketHours(): boolean {
   return dec >= 9.5 && dec < 16
 }
 
+// ─── ETF Price Feed (Yahoo Finance) ──────────────────────────────────────────
+
+export type EtfFeedStatus = 'loading' | 'live' | 'partial' | 'manual'
+
+export interface EtfFeedState {
+  status:      EtfFeedStatus
+  lastUpdated: Date | null
+}
+
+interface EtfPayload {
+  uvix?: number | null; svxy?: number | null; vxx?: number | null
+  error?: string
+}
+
+export function useEtfPrices(
+  update: (key: keyof DashState, val: number) => void,
+): EtfFeedState {
+  const [status,      setStatus]      = useState<EtfFeedStatus>('loading')
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const fetchEtfPrices = useCallback(async () => {
+    try {
+      const res  = await fetch('/api/etf-prices')
+      const data: EtfPayload = await res.json()
+      if (data.error) { setStatus('manual'); return }
+      let count = 0
+      if (data.uvix != null) { update('uvix', +data.uvix.toFixed(2)); count++ }
+      if (data.svxy != null) { update('svxy', +data.svxy.toFixed(2)); count++ }
+      if (data.vxx  != null) { update('vxx',  +data.vxx.toFixed(2));  count++ }
+      setStatus(count === 3 ? 'live' : count > 0 ? 'partial' : 'manual')
+      setLastUpdated(new Date())
+    } catch {
+      setStatus('manual')
+    }
+  }, [update])
+
+  useEffect(() => {
+    fetchEtfPrices()
+    const tick = () => {
+      fetchEtfPrices()
+      timerRef.current = setTimeout(tick, isETMarketHours() ? 30_000 : 300_000)
+    }
+    timerRef.current = setTimeout(tick, isETMarketHours() ? 30_000 : 300_000)
+    return () => { if (timerRef.current) clearTimeout(timerRef.current) }
+  }, [fetchEtfPrices])
+
+  return { status, lastUpdated }
+}
+
+// ─── Main Quotes Feed ─────────────────────────────────────────────────────────
+
 export function useMarketData(
   update: (key: keyof DashState, val: number) => void,
 ): FeedState {
