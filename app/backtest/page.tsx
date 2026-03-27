@@ -459,10 +459,10 @@ export default function BacktestPage() {
             <div style={{ background: '#0a0d14', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 6, padding: 16 }}>
               <div style={{ fontSize: 9, letterSpacing: '0.18em', color: '#2e3648', marginBottom: 8 }}>SIMULATION METHODOLOGY</div>
               <div style={{ fontSize: 10, color: '#4a5468', lineHeight: 1.7 }}>
-                Strategy: Regime 1 days only · Sell 1 UVXY call at 1.27× spot · 21 calendar-equivalent trading days DTE
-                · IV estimated as VIX × 1.5 (UVXY options typically trade at 1.3–1.7× VIX) · Risk-free rate 5%
+                Strategy: Regime 1 &amp; 2 days · Sell 1 UVXY call at 1.27× spot · 21 trading days DTE · Risk-free rate 5%
+                · IV = max(VIX × 8%, 100%) — UVXY options trade at ~100–200% IV (2× leveraged VIX ETN with high vol-of-vol)
                 · Stop loss: buy back if premium doubles (2× credit) · Regime exit: close at market if Regime 3 or 4 fires
-                · P&L shown per option contract share (multiply by 100 for full contract, then by number of contracts)
+                · P&L per option share (× 100 for full contract, × contracts for total)
                 · Historical data: Yahoo Finance daily closes (^VIX, ^VIX3M, ^VVIX, UVXY) · VIX3M estimated as VIX×1.08 when unavailable
               </div>
             </div>

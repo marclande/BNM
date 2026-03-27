@@ -29,9 +29,10 @@ export function bsCall(S: number, K: number, T: number, sigma: number, r = 0.05)
   return S * normCDF(d1) - K * Math.exp(-r * T) * normCDF(d2)
 }
 
-/** UVXY options trade at roughly 1.5× the VIX level in IV terms */
+/** UVXY options IV ≈ 8–10× VIX as annual sigma (e.g. VIX=15 → ~120% IV).
+ *  Floored at 100% — even in calm markets UVXY HV rarely drops below ~80%. */
 function uvxyIV(vix: number): number {
-  return (vix / 100) * 1.5
+  return Math.max(vix * 0.08, 1.0)
 }
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
@@ -216,7 +217,7 @@ export function runBacktest(rawRows: RawRow[]): BacktestResult {
 
     // ── Enter new trade on Regime 1 (or Regime 2 at half size — skipped for
     //    clarity; Tier 1 is Regime 1 only) ───────────────────────────────────
-    if (!openTrade && regime === 1) {
+    if (!openTrade && (regime === 1 || regime === 2)) {
       const strike = parseFloat((uvxy * STRIKE_MULT).toFixed(2))
       const credit = parseFloat(bsCall(uvxy, strike, DTE / 252, uvxyIV(vix)).toFixed(4))
       if (credit >= MIN_CREDIT) {
